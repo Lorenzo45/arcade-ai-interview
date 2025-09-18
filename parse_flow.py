@@ -7,6 +7,7 @@ Extracts: type, title, subtitle, url, hotspots, clickContext
 import json
 import sys
 import os
+import base64
 from typing import Dict, List, Any, Optional
 try:
     import openai
@@ -127,6 +128,56 @@ Raw data:
         return f"Error generating summary: {str(e)}"
 
 
+def generate_flow_image(summary: str) -> bool:
+    """Generate a professional image depicting the main actions of the flow."""
+    if openai is None:
+        print("Error: OpenAI library not installed.")
+        return False
+
+    # Check for API key
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        print("Error: OPENAI_API_KEY environment variable not set.")
+        return False
+
+    try:
+        client = openai.OpenAI(api_key=api_key)
+
+        # Create image prompt based on the summary
+        image_prompt = f"""Based on the following user journey, generate a professional, clean illustration for a branded social media post. The image should look like a feature announcement/highlight and does not need to include all steps.
+
+User Journey:
+{summary}"""
+
+        response = client.responses.create(
+            model="gpt-5",
+            input=image_prompt,
+            tools=[{"type": "image_generation"}],
+        )
+
+        # Save the image to a file
+        image_data = [
+            output.result
+            for output in response.output
+            if output.type == "image_generation_call"
+        ]
+
+        if image_data:
+            image_base64 = image_data[0]
+            os.makedirs('output', exist_ok=True)
+            with open("output/flow_image.png", "wb") as f:
+                f.write(base64.b64decode(image_base64))
+            print("Image saved to output/flow_image.png")
+            return True
+        else:
+            print("No image data received from API")
+            return False
+
+    except Exception as e:
+        print(f"Error generating image: {str(e)}")
+        return False
+
+
 def main():
     """Main function to parse flow.json and output extracted data."""
     file_path = 'flow.json'
@@ -138,7 +189,7 @@ def main():
     extracted_steps = parse_flow_json(file_path)
 
     if extracted_steps:
-        # Always generate summary
+        print("Generating flow summary...")
         summary = generate_summary_with_openai(extracted_steps)
 
         # Write summary to file in output folder
@@ -147,7 +198,12 @@ def main():
             f.write(summary)
 
         print("Summary written to output/flow_summary.md")
+        print("Generating image...")
+
+        # Generate and save image
+        generate_flow_image(summary)
     else:
+        print("Error extracting flow summary")
         sys.exit(1)
 
 

@@ -1,11 +1,11 @@
 ## User Interactions
-1. Tapped the search bar to start a product search.  
-2. Clicked the Razor A5 Lux 2 Wheel Kick Scooter image to view product details.  
+1. Tapped the search bar to begin looking for a product.  
+2. Clicked the Razor A5 Lux scooter image to view product details and options.  
 3. Selected the Blue color option.  
-4. Viewed additional color option (Pink).  
-5. Clicked "Add to cart".  
-6. Selected "Decline coverage" for the protection plan prompt.  
-7. Opened the cart to review the selected item(s).
+4. Viewed an additional color option (Pink).  
+5. Clicked "Add to cart" to add the scooter to the shopping cart.  
+6. Selected "Decline coverage" (chose not to add a protection plan).  
+7. Opened the cart (clicked the cart icon/badge to review items).
 
 ## Summary
-The user was shopping on Target.com for a Razor A5 Lux scooter. They searched/began browsing, opened the scooter’s product page, explored color options (including Blue and Pink), added the scooter to their cart, declined an optional protection plan, and then navigated to the cart to review their selection before checkout.
+The user searched Target.com for a Razor scooter, opened the scooter's product page, reviewed color options (Blue and Pink), added the scooter to their cart, declined the optional protection plan, and then navigated to their cart to review the selected item before proceeding to checkout.

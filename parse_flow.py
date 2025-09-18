@@ -6,7 +6,12 @@ Extracts: type, title, subtitle, url, hotspots, clickContext
 
 import json
 import sys
+import os
 from typing import Dict, List, Any, Optional
+try:
+    import openai
+except ImportError:
+    openai = None
 
 
 def extract_step_fields(step: Dict[str, Any]) -> Dict[str, Any]:
@@ -83,6 +88,50 @@ def parse_flow_json(file_path: str) -> List[Dict[str, Any]]:
         return []
 
 
+def generate_summary_with_openai(extracted_data: List[Dict[str, Any]]) -> str:
+    """Generate a summary of the extracted flow data using OpenAI API."""
+    if openai is None:
+        return "Error: OpenAI library not installed. Run 'pip install openai' to use summary feature."
+
+    # Check for API key
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        return "Error: OPENAI_API_KEY environment variable not set."
+
+    try:
+        client = openai.OpenAI(api_key=api_key)
+
+        # Prepare the prompt
+        data_str = json.dumps(extracted_data, indent=2)
+        prompt = f"""
+Analyze the following flow data and provide a concise summary:
+
+{data_str}
+
+Please provide:
+1. A brief description of what this flow demonstrates
+2. The key steps involved
+3. The main interactive elements (hotspots and click contexts)
+4. Any notable patterns or structure
+
+Keep the summary concise but informative.
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            temperature=0.7
+        )
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+        return f"Error generating summary: {str(e)}"
+
+
 def main():
     """Main function to parse flow.json and output extracted data."""
     file_path = 'flow.json'
@@ -94,6 +143,12 @@ def main():
     extracted_steps = parse_flow_json(file_path)
 
     if extracted_steps:
+        # Always generate summary
+        summary = generate_summary_with_openai(extracted_steps)
+        print("=== FLOW SUMMARY ===")
+        print(summary)
+        print("\n=== EXTRACTED DATA ===")
+
         # Output as pretty-printed JSON
         print(json.dumps(extracted_steps, indent=2))
     else:

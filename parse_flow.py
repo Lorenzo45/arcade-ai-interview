@@ -25,17 +25,32 @@ def extract_step_fields(step: Dict[str, Any]) -> Dict[str, Any]:
     if 'subtitle' in step:
         extracted['subtitle'] = step['subtitle']
 
-    # Include url if present
-    if 'url' in step:
-        extracted['url'] = step['url']
-
-    # Include hotspots if present
+    # Include hotspots if present (only keep label field from each hotspot)
     if 'hotspots' in step:
-        extracted['hotspots'] = step['hotspots']
+        hotspots = step['hotspots']
+        filtered_hotspots = []
 
-    # Include clickContext if present
+        for hotspot in hotspots:
+            if 'label' in hotspot:
+                filtered_hotspots.append({'label': hotspot['label']})
+
+        if filtered_hotspots:
+            extracted['hotspots'] = filtered_hotspots
+
+    # Include clickContext if present (only keep specified fields)
     if 'clickContext' in step:
-        extracted['clickContext'] = step['clickContext']
+        click_context = step['clickContext']
+        filtered_click_context = {}
+
+        if 'cssSelector' in click_context:
+            filtered_click_context['cssSelector'] = click_context['cssSelector']
+        if 'text' in click_context:
+            filtered_click_context['text'] = click_context['text']
+        if 'elementType' in click_context:
+            filtered_click_context['elementType'] = click_context['elementType']
+
+        if filtered_click_context:
+            extracted['clickContext'] = filtered_click_context
 
     return extracted
 

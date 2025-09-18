@@ -104,7 +104,9 @@ def generate_summary_with_openai(extracted_data: List[Dict[str, Any]]) -> str:
         # Prepare the prompt
         data_str = json.dumps(extracted_data, indent=2)
         prompt = f"""
-Analyze the following data and provide a numbered, non-technical list of user actions (e.g. "Clicked on checkout", "Search for X")
+Analyze the following data and provide two things in markdown format:
+## User Interactions: a numbered, non-technical list of user actions (e.g. "Clicked on checkout", "Search for X")
+## Summary: a clear, readable summary of what the user was trying to accomplish
 
 Note: Chapters are not user actions but can be used for context to understand actions
 
@@ -138,12 +140,13 @@ def main():
     if extracted_steps:
         # Always generate summary
         summary = generate_summary_with_openai(extracted_steps)
-        print("=== FLOW SUMMARY ===")
-        print(summary)
-        print("\n=== EXTRACTED DATA ===")
 
-        # Output as pretty-printed JSON
-        print(json.dumps(extracted_steps, indent=2))
+        # Write summary to file in output folder
+        os.makedirs('output', exist_ok=True)
+        with open('output/flow_summary.md', 'w', encoding='utf-8') as f:
+            f.write(summary)
+
+        print("Summary written to output/flow_summary.md")
     else:
         sys.exit(1)
 

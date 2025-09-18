@@ -104,29 +104,22 @@ def generate_summary_with_openai(extracted_data: List[Dict[str, Any]]) -> str:
         # Prepare the prompt
         data_str = json.dumps(extracted_data, indent=2)
         prompt = f"""
-Analyze the following flow data and provide a concise summary:
+Analyze the following data and provide a numbered, non-technical list of user actions (e.g. "Clicked on checkout", "Search for X")
+
+Note: Chapters are not user actions but can be used for context to understand actions
+
+Raw data:
 
 {data_str}
-
-Please provide:
-1. A brief description of what this flow demonstrates
-2. The key steps involved
-3. The main interactive elements (hotspots and click contexts)
-4. Any notable patterns or structure
-
-Keep the summary concise but informative.
 """
 
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=500,
-            temperature=0.7
+        response = client.responses.create(
+            model="gpt-5-mini",
+            reasoning={"effort": "low"},
+            input=prompt
         )
 
-        return response.choices[0].message.content
+        return response.output_text
 
     except Exception as e:
         return f"Error generating summary: {str(e)}"
